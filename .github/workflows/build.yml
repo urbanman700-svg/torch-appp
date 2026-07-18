@@ -33,7 +33,7 @@ jobs:
         run: chmod +x gradlew || true
       - name: Build with Gradle
         env:
-          BUILD_FORMAT: "apk"
+          BUILD_FORMAT: "aab"
           GRADLE_DEBUG_TASK: "assembleDebug"
           IS_RELEASE: "true"
         run: |
@@ -58,7 +58,7 @@ jobs:
           KEYSTORE_PWD: "123456"
           ALIAS: "Newapptorch1"
           KEY_PWD: "123456"
-          BUILD_FORMAT: "apk"
+          BUILD_FORMAT: "aab"
         run: |
           echo "::add-mask::$KEYSTORE_B64"
           echo "::add-mask::$KEYSTORE_PWD"
@@ -97,7 +97,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-signed-apk
+          name: app-release-signed-aab
           path: |
-            dist-out/app-release.apk
+            dist-out/app-release.aab
       
