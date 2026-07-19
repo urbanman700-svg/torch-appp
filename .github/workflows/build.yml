@@ -33,9 +33,9 @@ jobs:
         run: chmod +x gradlew || true
       - name: Build with Gradle
         env:
-          BUILD_FORMAT: "aab"
+          BUILD_FORMAT: "apk"
           GRADLE_DEBUG_TASK: "assembleDebug"
-          IS_RELEASE: "true"
+          IS_RELEASE: "false"
         run: |
           if [ "$IS_RELEASE" = "true" ]; then
             if [ "$BUILD_FORMAT" = "aab" ]; then
@@ -52,52 +52,13 @@ jobs:
           else
             gradle $GRADLE_TASK --no-daemon
           fi
-      - name: Sign Release Artifact
-        env:
-          KEYSTORE_B64: "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"
-          KEYSTORE_PWD: "123456"
-          ALIAS: "Newapptorch1"
-          KEY_PWD: "123456"
-          BUILD_FORMAT: "aab"
-        run: |
-          echo "::add-mask::$KEYSTORE_B64"
-          echo "::add-mask::$KEYSTORE_PWD"
-          echo "::add-mask::$KEY_PWD"
-          
-          # 1. Decode keystore file
-          echo "$KEYSTORE_B64" | base64 -d > release.keystore
-          
-          # 2. Create output directory
-          mkdir -p dist-out
-          
-          # 3. Perform signing
-          if [ "$BUILD_FORMAT" = "aab" ]; then
-            TARGET_AAB=$(find . -name "*.aab" | grep -v "node_modules" | head -n 1)
-            if [ -n "$TARGET_AAB" ]; then
-              echo "Signing AAB: $TARGET_AAB"
-              jarsigner -keystore release.keystore -storepass "$KEYSTORE_PWD" -keypass "$KEY_PWD" "$TARGET_AAB" "$ALIAS"
-              cp "$TARGET_AAB" dist-out/app-release.aab
-              echo "AAB signed successfully"
-            else
-              echo "Error: Could not find any AAB files to sign"
-              exit 1
-            fi
-          else
-            TARGET_APK=$(find . -name "*unsigned.apk" -o -name "*release.apk" | grep -v "node_modules" | head -n 1)
-            if [ -n "$TARGET_APK" ]; then
-              echo "Signing APK: $TARGET_APK"
-              APKSIGNER=$(find $ANDROID_HOME/build-tools -name "apksigner" | sort -V | tail -n 1)
-              $APKSIGNER sign --ks release.keystore --ks-key-alias "$ALIAS" --ks-pass pass:"$KEYSTORE_PWD" --key-pass pass:"$KEY_PWD" --out dist-out/app-release.apk "$TARGET_APK"
-              echo "APK signed successfully"
-            else
-              echo "Error: Could not find any APK files to sign"
-              exit 1
-            fi
-          fi
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-signed-aab
+          name: app-debug-apk
           path: |
-            dist-out/app-release.aab
+            app/build/outputs/apk/debug/*.apk
+            build/outputs/apk/debug/*.apk
+            **/debug/*.apk
+            **/*debug*.apk
       
