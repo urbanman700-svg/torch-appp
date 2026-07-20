@@ -35,7 +35,7 @@ jobs:
         env:
           BUILD_FORMAT: "apk"
           GRADLE_DEBUG_TASK: "assembleDebug"
-          IS_RELEASE: "false"
+          IS_RELEASE: "true"
         run: |
           if [ "$IS_RELEASE" = "true" ]; then
             if [ "$BUILD_FORMAT" = "aab" ]; then
@@ -52,13 +52,44 @@ jobs:
           else
             gradle $GRADLE_TASK --no-daemon
           fi
+      - name: Sign Release Artifact (Debug Keystore)
+        env:
+          BUILD_FORMAT: "apk"
+        run: |
+          # 1. Generate debug keystore
+          keytool -genkey -v -keystore release.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          
+          # 2. Create output directory
+          mkdir -p dist-out
+          
+          # 3. Perform signing
+          if [ "$BUILD_FORMAT" = "aab" ]; then
+            TARGET_AAB=$(find . -name "*.aab" | grep -v "node_modules" | head -n 1)
+            if [ -n "$TARGET_AAB" ]; then
+              echo "Signing AAB: $TARGET_AAB"
+              jarsigner -keystore release.keystore -storepass android -keypass android "$TARGET_AAB" androiddebugkey
+              cp "$TARGET_AAB" dist-out/app-release.aab
+              echo "AAB signed successfully"
+            else
+              echo "Error: Could not find any AAB files to sign"
+              exit 1
+            fi
+          else
+            TARGET_APK=$(find . -name "*unsigned.apk" -o -name "*release.apk" | grep -v "node_modules" | head -n 1)
+            if [ -n "$TARGET_APK" ]; then
+              echo "Signing APK: $TARGET_APK"
+              APKSIGNER=$(find $ANDROID_HOME/build-tools -name "apksigner" | sort -V | tail -n 1)
+              $APKSIGNER sign --ks release.keystore --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out dist-out/app-release.apk "$TARGET_APK"
+              echo "APK signed successfully"
+            else
+              echo "Error: Could not find any APK files to sign"
+              exit 1
+            fi
+          fi
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
+          name: app-release-signed-apk
           path: |
-            app/build/outputs/apk/debug/*.apk
-            build/outputs/apk/debug/*.apk
-            **/debug/*.apk
-            **/*debug*.apk
+            dist-out/app-release.apk
       
